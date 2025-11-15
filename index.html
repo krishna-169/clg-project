@@ -921,6 +921,12 @@
             font-size: 24px;
         }
 
+        .telegram-btn svg {
+            width: 28px;
+            height: 28px;
+            fill: currentColor;
+        }
+
         .chat-window {
             display: none; /* Hidden by default */
             position: fixed;
@@ -1801,7 +1807,11 @@
     <!-- Floating Buttons (Voice Assistant & Chatbot & Telegram) -->
     <button class="floating-btn voice-assistant-btn" id="voice-assist-btn" aria-label="Voice Assistant">🎤</button>
     <button class="floating-btn chat-btn" id="chat-toggle-btn" aria-label="Open Chatbot">💬</button>
-    <button class="floating-btn telegram-btn" id="telegram-bot-btn" aria-label="Open Telegram Bot">TG</button>
+    <button class="floating-btn telegram-btn" id="telegram-bot-btn" aria-label="Open Telegram Bot">
+        <svg viewBox="0 0 24 24" role="img" aria-hidden="true">
+            <path d="M21.543 2.47a1.5 1.5 0 0 0-1.53-.182L3.064 9.685a1.5 1.5 0 0 0 .118 2.818l3.71 1.247 1.438 4.791a1.5 1.5 0 0 0 2.48.643l2.39-2.286 3.71 2.787a1.5 1.5 0 0 0 2.367-.86l2.737-14.03a1.5 1.5 0 0 0-.472-1.325ZM9.79 15.966l-.96-3.197 6.744-4.04-5.784 4.905ZM18.63 6.2l-2.266 11.615-3.588-2.698a1.5 1.5 0 0 0-2.05.106l-1.105 1.058-.83-2.763 8.915-7.318Z" />
+        </svg>
+    </button>
 
     <div class="chat-window" id="chat-window">
         <div class="chat-header">
