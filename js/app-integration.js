@@ -77,6 +77,7 @@
         // Login/Signup Integration
         // ===================================
         const loginForm = document.getElementById('login-form');
+        const googleAuthBtn = document.getElementById('google-auth-btn');
         const loginToggleLink = document.getElementById('login-toggle-link');
         let isLoginMode = true;
 
@@ -153,6 +154,35 @@
                 const signupNameField = document.getElementById('signup-name-field');
                 if (signupNameField) signupNameField.style.display = 'none';
             }
+        }
+
+        if (googleAuthBtn) {
+            const originalGoogleText = googleAuthBtn.textContent;
+            const restoreGoogleBtn = () => {
+                googleAuthBtn.disabled = false;
+                googleAuthBtn.classList.remove('is-loading');
+                googleAuthBtn.setAttribute('aria-busy', 'false');
+                googleAuthBtn.textContent = originalGoogleText;
+            };
+
+            googleAuthBtn.addEventListener('click', async () => {
+                if (!sb || typeof sb.signInWithGoogle !== 'function') {
+                    alert('Google sign-in is currently unavailable.');
+                    return;
+                }
+
+                try {
+                    googleAuthBtn.disabled = true;
+                    googleAuthBtn.classList.add('is-loading');
+                    googleAuthBtn.setAttribute('aria-busy', 'true');
+                    googleAuthBtn.textContent = 'Redirecting...';
+                    await sb.signInWithGoogle();
+                } catch (error) {
+                    console.error('Google sign-in failed:', error);
+                    alert('Failed to redirect to Google. Please try again.');
+                    restoreGoogleBtn();
+                }
+            });
         }
 
         // ===================================

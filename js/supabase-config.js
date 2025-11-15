@@ -106,6 +106,23 @@ class SupabaseService {
         return data;
     }
 
+    async signInWithGoogle() {
+        if (!this.client) throw new Error('Supabase not initialized');
+
+        const { data, error } = await this.client.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin
+            }
+        });
+
+        if (error) throw error;
+
+        if (data?.url) {
+            window.location.assign(data.url);
+        }
+    }
+
     async signOut() {
         if (!this.client) throw new Error('Supabase not initialized');
         
