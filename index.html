@@ -8,6 +8,8 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
         <link rel="stylesheet" href="css/menu.css">
         <link rel="stylesheet" href="css/intro.css">
         <link rel="stylesheet" href="css/responsive.css">
@@ -36,7 +38,7 @@
     </style>
     
     <script type="text/javascript"
-        src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+        src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer>
     </script>
     
     <style>
@@ -83,6 +85,43 @@
             touch-action: manipulation;
             -webkit-text-size-adjust: 100%;
             -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Dark mode theme overrides */
+        body.dark-mode {
+            --color-bg: #0b1120;
+            --color-bg-light: #111827;
+            --color-text: #e5e7eb;
+            --color-text-light: #9ca3af;
+            --shadow-light: 0 4px 12px rgba(0,0,0,0.6);
+            --shadow-medium: 0 6px 16px rgba(0,0,0,0.8);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+        }
+
+        body.dark-mode .form-container,
+        body.dark-mode .workspace-widget,
+        body.dark-mode .event-card,
+        body.dark-mode .market-card,
+        body.dark-mode .job-card {
+            background-color: #020617;
+            border-color: #1f2937;
+        }
+
+        body.dark-mode .page-header,
+        body.dark-mode .stats,
+        body.dark-mode .features,
+        body.dark-mode .how-it-works,
+        body.dark-mode .market-list,
+        body.dark-mode .job-list,
+        body.dark-mode .workspace-grid {
+            background-color: var(--color-bg-light);
+        }
+
+        body.dark-mode .navbar,
+        body.dark-mode .chat-window {
+            background-color: #020617;
+            color: var(--color-text);
         }
 
         .container {
@@ -873,6 +912,15 @@
             font-size: 28px;
         }
 
+        /* === TELEGRAM BOT BUTTON === */
+        .telegram-btn {
+            bottom: 190px;
+            right: 30px;
+            background-color: #0088cc; /* Telegram blue */
+            color: #fff;
+            font-size: 24px;
+        }
+
         .chat-window {
             display: none; /* Hidden by default */
             position: fixed;
@@ -1079,6 +1127,8 @@
         <div class="intro-content">
             <video id="intro-video" class="intro-video" muted autoplay playsinline preload="auto" aria-label="Campus Hub welcome animation">
                 <source src="assets/intro.mp4" type="video/mp4">
+                <source src="assets/intro-fallback.webm" type="video/webm">
+                <img src="assets/logo.jpg" alt="Fallback image" style="width: 100%; height: 100%; object-fit: contain;">
             </video>
         </div>
     </div>
@@ -1155,11 +1205,13 @@
 
     <header class="navbar" id="main-navbar" role="banner">
         <div class="navbar-container">
-            <a class="navbar-logo" id="logo-home-link" href="#" aria-label="Campus Hub home">
-                <img src="assets/logo.jpg" alt="Campus Hub" class="site-logo" />
-                <span class="site-title">Campus Hub</span>
-            </a>
-            <div class="navbar-platform-tag">✨ Platform for College Students</div>
+            <div class="navbar-branding">
+                <a class="navbar-logo" id="logo-home-link" href="#" aria-label="Campus Hub home">
+                    <img src="assets/logo.jpg" alt="Campus Hub" class="site-logo" />
+                    <span class="site-title">Campus Hub</span>
+                </a>
+                <div class="navbar-platform-tag">✨ Platform for College Students</div>
+            </div>
             
             <button class="navbar-toggle" id="mobile-menu-toggle" aria-label="Toggle menu" aria-expanded="false">
                 <span class="bar"></span>
@@ -1176,6 +1228,8 @@
                         <li><a id="nav-market-link" href="#page-market">Marketplace</a></li>
                         <li><a id="nav-profile-link" href="#page-profile">Profile</a></li>
                         <li><a id="nav-feedback-link" href="#page-feedback">Feedback</a></li>
+                        <li data-admin-only style="display:none;"><a id="nav-admin-dashboard-link" href="#page-admin-dashboard">Admin</a></li>
+                        <li><button id="btn-theme-toggle" style="border:none;background:#f3f4f6;border-radius:999px;padding:6px 12px;cursor:pointer;font-size:0.9rem;">🌙</button></li>
                         <li><a class="nav-button-login" id="nav-login-link" role="button" aria-label="Open login dialog" tabindex="0">Login</a></li>
                     </ul>
                 </div>
@@ -1183,11 +1237,21 @@
         </div>
     </header>
 
-                <!-- Non-critical scripts are lazy-loaded via js/loader.js -->
-                <script src="js/loader.js" defer></script>
-        <div id="page-home" class="page" style="display: block;"> <section class="hero">
+        <!-- Load environment variables (generated at build time) -->
+        <script src="js/env.js"></script>
+        
+        <!-- Supabase configuration and service -->
+        <script src="js/supabase-config.js" defer></script>
+        
+        <!-- App integration with Supabase -->
+        <script src="js/app-integration.js" defer></script>
+        
+        <!-- Non-critical scripts are lazy-loaded via js/loader.js -->
+        <script src="js/loader.js" defer></script>
+    <div id="page-home" class="page" style="display: block;"> <section class="hero">
                 <div class="container">
                     <h1>Your Campus Hub for <span>Events, Jobs & Rewards</span></h1>
+                    <p id="home-user-summary" class="hero-user-summary" data-requires-auth></p>
                     <p>
                         Find the best building events, find views on campus gigs,
                         find all the student discounts, and play the card rewards by contributing to the
@@ -1253,26 +1317,7 @@
             </section>
             <section class="events-list">
                 <div class="container event-card-list">
-                    <div class="event-card">
-                        <h3>AI Workshop</h3>
-                        <p class="event-card-subtitle">Learn AI basics</p>
-                        <ul class="event-card-details">
-                            <li><span>👥</span>Organizer: Tech Club</li>
-                            <li><span>📅</span>12/1/2025</li>
-                            <li><span>📍</span>Room 101</li>
-                        </ul>
-                        <div class="event-card-footer">Posted by <a href="#">Test User</a></div>
-                    </div>
-                    <div class="event-card">
-                        <h3>Blockchain Workshop</h3>
-                        <p class="event-card-subtitle">Learn blockchain development</p>
-                        <ul class="event-card-details">
-                            <li><span>👥</span>Organizer: Harvard Crypto Club</li>
-                            <li><span>📅</span>3/1/2025</li>
-                            <li><span>📍</span>Tech Lab</li>
-                        </ul>
-                        <div class="event-card-footer">Posted by <a href="#">Profile Tester 1760202520</a></div>
-                    </div>
+                    <!-- Filled dynamically from Supabase by app-integration.js (loadEvents) -->
                 </div>
             </section>
         </div> <div id="page-login" class="page">
@@ -1341,6 +1386,7 @@
                             <input type="tel" id="profile-phone" placeholder="e.g., 9123456789">
                         </div>
                         <button type="submit" class="btn btn-primary btn-submit" id="btn-save-profile">Save Settings</button>
+                        <button type="button" class="btn btn-secondary btn-submit" id="btn-profile-logout" style="margin-top:10px;">Logout</button>
                     </form>
                 </div>
             </section>
@@ -1387,28 +1433,11 @@
             
             <section class="market-list">
                 <div class="container">
-                    <div class="market-grid" id="market-grid-container">
-                        
-                        <div class="market-card">
-                            <div class="market-card-image" style="background-image: url(https://via.placeholder.com/400x300.png?text=Textbook)"></div>
-                            <div class="market-card-content">
-                                <h3>Used Physics Textbook</h3>
-                                <p class="market-card-desc">Like new, 10th edition.</p>
-                                <p class="market-card-price">Starting Bid: ₹500</p>
-                                <button class="btn btn-bid" data-item="textbook" data-title="Used Physics Textbook">Bid on Item</button>
-                            </div>
-                        </div>
-                        
-                        <div class="market-card">
-                            <div class="market-card-image" style="background-image: url(https://via.placeholder.com/400x300.png?text=Bicycle)"></div>
-                            <div class="market-card-content">
-                                <h3>Old Bicycle</h3>
-                                <p class="market-card-desc">Needs some work, but rides well.</p>
-                                <p class="market-card-price">Starting Bid: ₹1200</p>
-                                <button class="btn btn-bid" data-item="bicycle" data-title="Old Bicycle">Bid on Item</button>
-                            </div>
-                        </div>
-                        
+                    <div class="section-header-flex">
+                        <div class="market-grid" id="market-grid-container">
+                    </div>
+                    <div class="market-grid" id="market-items-grid">
+                        <!-- Filled dynamically from Supabase by app-integration.js (loadMarketItems) -->
                     </div>
                 </div>
             </section>
@@ -1623,6 +1652,62 @@
                     </div>
                 </div>
                 
+                <div class="workspace-widget" id="workspace-saved-widget">
+                    <div class="workspace-widget-header">
+                        <h2>My Saved</h2>
+                    </div>
+                    <div class="workspace-widget-body">
+                        <p style="font-size:0.9rem;color:#555;">Quick access to your saved events, jobs, and marketplace items.</p>
+                        <div id="saved-events-section" style="margin-top:10px;">
+                            <h3 style="font-size:1rem;margin-bottom:6px;">Events</h3>
+                            <ul id="saved-events-list" style="list-style:none;padding-left:0;font-size:0.9rem;"></ul>
+                        </div>
+                        <div id="saved-jobs-section" style="margin-top:14px;">
+                            <h3 style="font-size:1rem;margin-bottom:6px;">Jobs</h3>
+                            <ul id="saved-jobs-list" style="list-style:none;padding-left:0;font-size:0.9rem;"></ul>
+                        </div>
+                        <div id="saved-market-section" style="margin-top:14px;">
+                            <h3 style="font-size:1rem;margin-bottom:6px;">Marketplace</h3>
+                            <ul id="saved-market-list" style="list-style:none;padding-left:0;font-size:0.9rem;"></ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="workspace-widget" id="workspace-events-calendar-widget">
+                    <div class="workspace-widget-header" style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+                        <h2>Events Calendar</h2>
+                        <button id="calendar-reminder-bell" title="View today's reminders" style="border:none;background:#eef2ff;border-radius:999px;padding:6px 10px;cursor:pointer;font-size:1rem;">🔔</button>
+                    </div>
+                    <div class="workspace-widget-body">
+                        <div id="events-calendar-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                            <button id="events-calendar-prev" style="border:none;background:#eee;border-radius:6px;padding:4px 8px;cursor:pointer;">◀</button>
+                            <h3 id="events-calendar-title" style="margin:0;font-size:1.1rem;"></h3>
+                            <button id="events-calendar-next" style="border:none;background:#eee;border-radius:6px;padding:4px 8px;cursor:pointer;">▶</button>
+                        </div>
+                        <table id="events-calendar" style="width:100%;border-collapse:collapse;font-size:0.9rem;">
+                            <thead>
+                                <tr>
+                                    <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Filled by JS -->
+                            </tbody>
+                        </table>
+                        <div id="events-calendar-list" style="margin-top:12px;font-size:0.9rem;">
+                            <strong>Events on selected day:</strong>
+                            <ul id="events-calendar-items" style="list-style:none;padding-left:0;margin-top:8px;"></ul>
+                        </div>
+                        <div id="events-calendar-reminder" style="margin-top:12px;font-size:0.9rem;">
+                            <strong>Personal reminder for this day:</strong>
+                            <div id="calendar-selected-date-label" style="margin:4px 0;color:#555;"></div>
+                            <input type="text" id="calendar-reminder-input" placeholder="Add a note for this day..." style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:0.9rem;margin-bottom:6px;">
+                            <button id="calendar-reminder-save" style="width:100%;border:none;border-radius:6px;padding:8px 10px;background:#4f46e5;color:#fff;cursor:pointer;font-size:0.9rem;font-weight:600;">Save Reminder</button>
+                            <div id="calendar-reminder-current" style="margin-top:6px;color:#4b5563;"></div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="workspace-widget budget">
                     <div class="workspace-widget-header">
                         <h2>My Budget Tracker</h2>
@@ -1669,7 +1754,7 @@
                     </div>
                 </div>
                 
-                <div class="workspace-widget ai-assistant">
+                <div class="workspace-widget ai-assistant" id="workspace-ai-widget" style="display: none;">
                     <div class="workspace-widget-header">
                         <h2>Personal Assistant</h2>
                     </div>
@@ -1687,12 +1772,38 @@
                 </div>
 
             </section>
+        </div> <div id="page-admin-dashboard" class="page" data-admin-only style="display:none;">
+            <section class="page-header">
+                <div class="container">
+                    <h1>Admin Dashboard</h1>
+                    <p>Manage all events, jobs, and marketplace items.</p>
+                    <div id="admin-dashboard-summary" style="margin-top:15px;display:flex;flex-wrap:wrap;gap:10px;font-size:0.95rem;">
+                        <span style="background:#eef2ff;border-radius:999px;padding:6px 12px;">Events live: <strong id="admin-count-events">0</strong></span>
+                        <span style="background:#ecfeff;border-radius:999px;padding:6px 12px;">Jobs live: <strong id="admin-count-jobs">0</strong></span>
+                        <span style="background:#fef3c7;border-radius:999px;padding:6px 12px;">Items live: <strong id="admin-count-items">0</strong></span>
+                    </div>
+                    <div style="margin-top:15px;max-width:320px;">
+                        <canvas id="admin-overview-chart" width="320" height="220" style="width:100%;max-width:320px;background:#fff;border-radius:12px;border:1px solid #e5e7eb;"></canvas>
+                    </div>
+                </div>
+            </section>
+            <section class="container" style="padding:30px 20px;">
+                <div class="form-container" style="max-width:1000px;margin:0 auto;">
+                    <div id="admin-events-list" style="margin-bottom:30px;font-size:0.95rem;"></div>
+
+                    <div id="admin-jobs-list" style="margin-bottom:30px;font-size:0.95rem;"></div>
+
+                    <div id="admin-market-list" style="font-size:0.95rem;"></div>
+                </div>
+            </section>
         </div> </main>
     
-    <button class="floating-btn voice-assistant-btn" id="voice-assist-btn" aria-label="Toggle voice assistant">🎤</button>
-    <button class="floating-btn chat-btn" id="chat-toggle-btn" aria-label="Open chat">💬</button>
+    <!-- Floating Buttons (Voice Assistant & Chatbot & Telegram) -->
+    <button class="floating-btn voice-assistant-btn" id="voice-assist-btn" aria-label="Voice Assistant">🎤</button>
+    <button class="floating-btn chat-btn" id="chat-toggle-btn" aria-label="Open Chatbot">💬</button>
+    <button class="floating-btn telegram-btn" id="telegram-bot-btn" aria-label="Open Telegram Bot">TG</button>
 
-    <div class="chat-window" id="chat-window"
+    <div class="chat-window" id="chat-window">
         <div class="chat-header">
             <h3>AI Assistant</h3>
             <button class="chat-close-btn" id="chat-close-btn">&times;</button>
@@ -2369,14 +2480,11 @@
             
             addMessageToLog(messageText, 'user', chatLog);
             chatInput.value = '';
-            
-            setTimeout(() => {
-                const botResponse = getBotResponse(messageText);
-                addMessageToLog(botResponse.text, 'bot', chatLog);
-                if (botResponse.action) {
-                    botResponse.action();
-                }
-            }, 500);
+
+            const botReply = getBotResponse(messageText);
+            if (botReply) {
+                addMessageToLog(botReply, 'bot', chatLog);
+            }
         }
         
         // --- Universal function for adding messages ---
@@ -2388,89 +2496,40 @@
             logElement.scrollTop = logElement.scrollHeight;
         }
         
-        // --- Universal function for getting bot responses ---
+        // Simple rule-based chatbot (offline, no Gemini)
         function getBotResponse(message) {
-            const msg = message.toLowerCase();
-            
-            if (msg.includes('hello') || msg.includes('hi')) {
-                return { text: 'Hi there! How can I help you today?' };
-            }
-            
-            // --- Enhanced AI Responses ---
-            if (msg.includes('roadmap') || msg.includes('how to learn')) {
-                if (msg.includes('web developer')) {
-                    return { text: "Here's a simple roadmap for a Web Developer: \n1. HTML & CSS \n2. JavaScript \n3. A framework like React or Vue. \n4. Node.js for backend (optional)." };
-                }
-                if (msg.includes('data science')) {
-                    return { text: "For Data Science: \n1. Learn Python \n2. Master libraries like Pandas & NumPy \n3. Learn SQL \n4. Study Machine Learning concepts." };
-                }
-                return { text: "I can provide a basic roadmap! What do you want to learn? (e.g., 'roadmap for web developer')" };
-            }
-            
-            if (msg.includes('explain') || msg.includes('doubt') || msg.includes('what is')) {
-                 if (msg.includes('python')) {
-                    return { text: "Python is a popular, easy-to-read programming language. It's used for web development, data science, AI, and much more!" };
-                }
-                 if (msg.includes('variable')) {
-                    return { text: "A variable is like a box or a container in programming where you can store a value (like a number, or text) to use later. You give it a name, like 'score = 10'." };
-                }
-                return { text: "I can try to explain simple concepts. What's your doubt about? (e.g., 'explain python')" };
-            }
-            
-            // --- Navigation Responses ---
-            if (msg.includes('workspace')) {
-                return { 
-                    text: 'Opening your Personal Workspace.',
-                    action: () => showPage(pageWorkspace)
-                };
-            }
-            if (msg.includes('feedback') || msg.includes('contact')) {
-                return { 
-                    text: 'Opening the Feedback page.',
-                    action: () => showPage(pageFeedback)
-                };
-            }
-            if (msg.includes('jobs') || msg.includes('internships')) {
-                return { 
-                    text: 'Sure, navigating to the Jobs & Internships page.',
-                    action: () => showPage(pageJobs)
-                };
-            }
-            if (msg.includes('events') || msg.includes('explore')) {
-                return { 
-                    text: 'Sure, navigating to the Events page.',
-                    action: () => showPage(pageEvents)
-                };
-            }
-            if (msg.includes('market') || msg.includes('buy') || msg.includes('marketplace')) {
-                return { 
-                    text: 'Opening the Marketplace for you.',
-                    action: () => showPage(pageMarket)
-                };
-            }
-            if (msg.includes('sell')) {
-                return { 
-                    text: 'Opening the "Sell Item" form.',
-                    action: () => showPage(pageSellItem)
-                };
-            }
-            if (msg.includes('profile') || msg.includes('settings') || msg.includes('phone number')) {
-                return { 
-                    text: 'Opening your Profile & Settings.',
-                    action: () => showPage(pageProfile)
-                };
-            }
-            if (msg.includes('home') || msg.includes('main page')) {
-                return { 
-                    text: 'Going back to the Home page.',
-                    action: () => showPage(pageHome)
-                };
+            if (!message) return '';
+            const text = message.toLowerCase();
+
+            if (text.includes('hello') || text.includes('hi') || text.includes('hey')) {
+                return 'Hi there! I\'m your Campus Hub assistant. How can I help you today?';
             }
 
-            // Default response
-            return { 
-                text: "Sorry, I'm just a simulation. I can navigate (e.g., 'show me jobs') or explain simple terms (e.g., 'explain python')."
-            };
+            if (text.includes('event')) {
+                return 'You can view events on the Events page and post your own events after logging in. Use the navigation bar and choose "Events".';
+            }
+
+            if (text.includes('job') || text.includes('intern')) {
+                return 'Check the Jobs page to see jobs and internships. You can also post opportunities for other students.';
+            }
+
+            if (text.includes('market') || text.includes('buy') || text.includes('sell')) {
+                return 'The Marketplace page lets you buy and sell items with other students. Open "Marketplace" from the top menu.';
+            }
+
+            if (text.includes('workspace') || text.includes('budget') || text.includes('todo')) {
+                return 'The Personal Workspace has a budget tracker, to-do list, and embedded chat. Open "My Workspace" from the navigation bar.';
+            }
+
+            if (text.includes('feedback') || text.includes('contact')) {
+                return 'To send feedback, go to the Feedback section, fill in your details, and submit the form. Your message will be sent directly.';
+            }
+
+            if (text.includes('login') || text.includes('sign up') || text.includes('signup')) {
+                return 'Use the Login / Signup page to create an account or sign in. Once logged in, you can post events, jobs, and marketplace items.';
+            }
+
+            return 'I\'m not sure about that yet, but you can explore the Events, Jobs, Marketplace, Workspace, and Feedback sections using the navigation bar.';
         }
         
         // ===================================
@@ -2487,6 +2546,17 @@
                 sendWorkspaceMessage();
             }
         });
+
+        // ===================================
+        // --- Telegram Bot Button Logic ---
+        // ===================================
+
+        const telegramBotBtn = document.getElementById('telegram-bot-btn');
+        if (telegramBotBtn) {
+            telegramBotBtn.addEventListener('click', () => {
+                window.open('https://t.me/stud030bot', '_blank');
+            });
+        }
         
         function sendWorkspaceMessage() {
             const messageText = wsChatInput.value.trim();
@@ -2494,55 +2564,53 @@
             
             addMessageToLog(messageText, 'user', wsChatLog);
             wsChatInput.value = '';
-            
-            setTimeout(() => {
-                // Use the *same* universal bot logic
-                const botResponse = getBotResponse(messageText); 
-                addMessageToLog(botResponse.text, 'bot', wsChatLog);
-                if (botResponse.action) {
-                    botResponse.action();
-                }
-            }, 500);
+
+            const botReply = getBotResponse(messageText);
+            if (botReply) {
+                addMessageToLog(botReply, 'bot', wsChatLog);
+            }
         }
         
         // ===================================
         // --- EmailJS Feedback Logic ---
         // ===================================
-
-        // 1. Initialize EmailJS with your Public Key
-        // --- PUT YOUR PUBLIC KEY HERE ---
-        // emailjs.init('YOUR_PUBLIC_KEY'); 
+        
+        // Initialize EmailJS with your Public Key (EmailJS dashboard -> Account -> API Keys)
+        emailjs.init('_oNb1898SjS6iMNi_'); 
 
         const feedbackForm = document.getElementById('feedback-form');
         const sendFeedbackBtn = document.getElementById('btn-send-feedback');
 
-        feedbackForm.addEventListener('submit', (e) => {
+        feedbackForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             sendFeedbackBtn.disabled = true;
             sendFeedbackBtn.textContent = 'Sending...';
 
-            // 2. Send the form data
-            // --- PUT YOUR SERVICE_ID & TEMPLATE_ID HERE ---
-            emailjs.sendForm('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', feedbackForm)
-                .then(() => {
-                    alert('Feedback sent! Thank you.');
-                    feedbackForm.reset();
-                    sendFeedbackBtn.disabled = false;
-                    sendFeedbackBtn.textContent = 'Send Feedback';
-                    showPage(pageHome);
-                }, (error) => {
-                    // --- This is a fallback for our simulation ---
-                    // --- since the keys are not filled in yet ---
-                    console.error('EmailJS Error (this is expected if keys are not set):', error);
-                    alert('This is a demo. If EmailJS keys were added, the feedback would be sent!');
-                    feedbackForm.reset();
-                    sendFeedbackBtn.disabled = false;
-                    sendFeedbackBtn.textContent = 'Send Feedback';
-                    showPage(pageHome);
-                });
+            const name = document.getElementById('feedback-name').value.trim();
+            const email = document.getElementById('feedback-email').value.trim();
+            const message = document.getElementById('feedback-message').value.trim();
+
+            // Send via EmailJS only (configured to your Gmail in EmailJS dashboard)
+            try {
+                await emailjs.sendForm('service_uhqzwb2', 'template_k5gdcgb', feedbackForm);
+                alert('Feedback sent! Thank you.');
+            } catch (emailErr) {
+                console.error('EmailJS Error (expected if not configured):', emailErr);
+                alert('Could not send feedback via EmailJS. Please configure your EmailJS service, template, and public key.');
+            } finally {
+                feedbackForm.reset();
+                sendFeedbackBtn.disabled = false;
+                sendFeedbackBtn.textContent = 'Send Feedback';
+                showPage(pageHome);
+            }
         });
         
+    </script>
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+          console.error('Unhandled error:', message, 'at', source, 'line', lineno, 'col', colno, error);
+        };
     </script>
 </body>
 </html>

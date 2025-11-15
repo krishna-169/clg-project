@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Supabase Connection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        
+        .test-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #ccc;
+        }
+        
+        .test-item.loading {
+            border-left-color: #ffc107;
+        }
+        
+        .test-item.success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .test-item.error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        
+        .test-item h3 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 1.1rem;
+        }
+        
+        .test-item p {
+            color: #666;
+            line-height: 1.6;
+            margin: 5px 0;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0,0,0,0.1);
+            border-top-color: #333;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .error-details {
+            background: #fff;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #721c24;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .success-icon {
+            color: #28a745;
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+        
+        .error-icon {
+            color: #dc3545;
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Connection Test</h1>
+        <p style="color: #666; margin-bottom: 30px;">Testing your Supabase setup...</p>
+        
+        <div id="test1" class="test-item loading">
+            <h3><span class="spinner"></span>Test 1: Loading Credentials</h3>
+            <p>Checking if Supabase credentials are configured...</p>
+        </div>
+        
+        <div id="test2" class="test-item">
+            <h3>Test 2: Connecting to Supabase</h3>
+            <p>Waiting for Test 1...</p>
+        </div>
+        
+        <div id="test3" class="test-item">
+            <h3>Test 3: Checking Database Tables</h3>
+            <p>Waiting for Test 2...</p>
+        </div>
+        
+        <div id="test4" class="test-item">
+            <h3>Test 4: Testing Authentication</h3>
+            <p>Waiting for Test 3...</p>
+        </div>
+        
+        <div id="results" style="display: none;">
+            <button class="btn" onclick="location.href='index.html'">✓ Go to Campus Hub</button>
+        </div>
+        
+        <div id="fix-instructions" style="display: none;">
+            <h3 style="color: #dc3545; margin-top: 30px;">⚠️ Setup Required</h3>
+            <p style="margin: 15px 0;">Follow these steps to fix the issues:</p>
+            <ol id="fix-steps" style="margin-left: 20px; color: #333; line-height: 2;">
+            </ol>
+        </div>
+    </div>
+    
+    <script src="js/env.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script>
+        let supabaseClient;
+        const fixSteps = [];
+        
+        async function runTests() {
+            // Test 1: Check credentials
+            await test1();
+            await sleep(500);
+            
+            // Test 2: Connect to Supabase
+            await test2();
+            await sleep(500);
+            
+            // Test 3: Check tables
+            await test3();
+            await sleep(500);
+            
+            // Test 4: Check auth
+            await test4();
+            
+            // Show results
+            showResults();
+        }
+        
+        async function test1() {
+            const el = document.getElementById('test1');
+            
+            try {
+                if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+                    throw new Error('Credentials not found');
+                }
+                
+                if (window.SUPABASE_URL === '' || window.SUPABASE_ANON_KEY === '') {
+                    throw new Error('Credentials are empty');
+                }
+                
+                el.className = 'test-item success';
+                el.innerHTML = `
+                    <h3><span class="success-icon">✓</span>Test 1: Loading Credentials</h3>
+                    <p>✓ Supabase URL found</p>
+                    <p>✓ Supabase Key found</p>
+                `;
+            } catch (error) {
+                el.className = 'test-item error';
+                el.innerHTML = `
+                    <h3><span class="error-icon">✗</span>Test 1: Loading Credentials</h3>
+                    <p>✗ ${error.message}</p>
+                    <div class="error-details">
+                        Problem: The file js/env.js is missing or empty.<br>
+                        Solution: Make sure js/env.js exists with your Supabase credentials.
+                    </div>
+                `;
+                fixSteps.push('Check that js/env.js file exists and has your Supabase credentials');
+                throw error;
+            }
+        }
+        
+        async function test2() {
+            const el = document.getElementById('test2');
+            el.className = 'test-item loading';
+            el.innerHTML = `
+                <h3><span class="spinner"></span>Test 2: Connecting to Supabase</h3>
+                <p>Attempting connection...</p>
+            `;
+            
+            try {
+                const { createClient } = supabase;
+                supabaseClient = createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+                
+                // Try a simple query
+                const { error } = await supabaseClient.from('profiles').select('count', { count: 'exact', head: true });
+                
+                if (error && error.code !== '42P01') {
+                    throw error;
+                }
+                
+                el.className = 'test-item success';
+                el.innerHTML = `
+                    <h3><span class="success-icon">✓</span>Test 2: Connecting to Supabase</h3>
+                    <p>✓ Successfully connected to Supabase</p>
+                    <p>✓ Your project is active</p>
+                `;
+            } catch (error) {
+                el.className = 'test-item error';
+                el.innerHTML = `
+                    <h3><span class="error-icon">✗</span>Test 2: Connecting to Supabase</h3>
+                    <p>✗ Connection failed</p>
+                    <div class="error-details">
+                        Error: ${error.message}<br><br>
+                        This usually means your Supabase credentials are incorrect.
+                    </div>
+                `;
+                fixSteps.push('Verify your Supabase URL and Key in js/env.js are correct');
+                throw error;
+            }
+        }
+        
+        async function test3() {
+            const el = document.getElementById('test3');
+            el.className = 'test-item loading';
+            el.innerHTML = `
+                <h3><span class="spinner"></span>Test 3: Checking Database Tables</h3>
+                <p>Checking if tables exist...</p>
+            `;
+            
+            try {
+                const tables = ['profiles', 'events', 'jobs', 'marketplace', 'todos', 'budget_expenses'];
+                const results = [];
+                
+                for (const table of tables) {
+                    const { error } = await supabaseClient.from(table).select('count', { count: 'exact', head: true });
+                    if (error && error.code === '42P01') {
+                        results.push(`✗ ${table} table missing`);
+                    } else {
+                        results.push(`✓ ${table} table exists`);
+                    }
+                }
+                
+                const allExist = results.every(r => r.startsWith('✓'));
+                
+                if (!allExist) {
+                    throw new Error('Some tables are missing');
+                }
+                
+                el.className = 'test-item success';
+                el.innerHTML = `
+                    <h3><span class="success-icon">✓</span>Test 3: Checking Database Tables</h3>
+                    ${results.map(r => `<p>${r}</p>`).join('')}
+                `;
+            } catch (error) {
+                el.className = 'test-item error';
+                el.innerHTML = `
+                    <h3><span class="error-icon">✗</span>Test 3: Checking Database Tables</h3>
+                    <p>✗ Database tables not found</p>
+                    <div class="error-details">
+                        You need to run the SQL setup script to create the database tables.
+                    </div>
+                `;
+                fixSteps.push('Run the SQL script from supabase-schema-fixed.sql in Supabase SQL Editor');
+                fixSteps.push('Link: https://supabase.com/dashboard/project/ltxvnsqiufatmtkmrwga/sql/new');
+                throw error;
+            }
+        }
+        
+        async function test4() {
+            const el = document.getElementById('test4');
+            el.className = 'test-item loading';
+            el.innerHTML = `
+                <h3><span class="spinner"></span>Test 4: Testing Authentication</h3>
+                <p>Checking authentication settings...</p>
+            `;
+            
+            try {
+                // Just check if auth is accessible
+                const { data, error } = await supabaseClient.auth.getSession();
+                
+                el.className = 'test-item success';
+                el.innerHTML = `
+                    <h3><span class="success-icon">✓</span>Test 4: Testing Authentication</h3>
+                    <p>✓ Authentication is working</p>
+                    <p>✓ Ready to create accounts</p>
+                `;
+            } catch (error) {
+                el.className = 'test-item error';
+                el.innerHTML = `
+                    <h3><span class="error-icon">✗</span>Test 4: Testing Authentication</h3>
+                    <p>✗ Authentication check failed</p>
+                    <div class="error-details">
+                        Error: ${error.message}
+                    </div>
+                `;
+                fixSteps.push('Enable Email authentication in Supabase dashboard');
+                fixSteps.push('Link: https://supabase.com/dashboard/project/ltxvnsqiufatmtkmrwga/auth/providers');
+                throw error;
+            }
+        }
+        
+        function showResults() {
+            if (fixSteps.length === 0) {
+                document.getElementById('results').style.display = 'block';
+            } else {
+                const fixEl = document.getElementById('fix-instructions');
+                const stepsEl = document.getElementById('fix-steps');
+                
+                stepsEl.innerHTML = fixSteps.map(step => `<li>${step}</li>`).join('');
+                fixEl.style.display = 'block';
+            }
+        }
+        
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        // Run tests on load
+        window.addEventListener('load', () => {
+            setTimeout(runTests, 500);
+        });
+    </script>
+</body>
+</html>

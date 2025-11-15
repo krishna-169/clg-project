@@ -18,8 +18,10 @@
     if ('requestIdleCallback' in window) {
       requestIdleCallback(async () => {
         try {
-          await loadScript('js/menu.js');
-          await loadScript('js/responsive.js');
+          await Promise.all([
+            loadScript('js/menu.js'),
+            loadScript('js/responsive.js')
+          ]);
         } catch (e) {
           console.warn('Loader: some scripts failed to load', e);
         }
@@ -27,8 +29,10 @@
     } else {
       setTimeout(async () => {
         try {
-          await loadScript('js/menu.js');
-          await loadScript('js/responsive.js');
+          await Promise.all([
+            loadScript('js/menu.js'),
+            loadScript('js/responsive.js')
+          ]);
         } catch (e) {
           console.warn('Loader: some scripts failed to load', e);
         }

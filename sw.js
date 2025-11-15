@@ -1,12 +1,17 @@
-const CACHE_NAME = 'campus-hub-v1';
+const CACHE_NAME = 'campus-hub-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/css/menu.css',
   '/css/intro.css',
+  '/css/responsive.css',
   '/js/intro.js',
   '/js/loader.js',
-  '/css/\0',
+  '/js/menu.js',
+  '/js/responsive.js',
+  '/js/env.js',
+  '/js/supabase-config.js',
+  '/js/app-integration.js',
   '/assets/logo.jpg'
 ];
 
@@ -39,7 +44,19 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Stale-while-revalidate for static assets (css/js/images)
   event.respondWith(
-    caches.match(req).then(cached => cached || fetch(req))
+    caches.match(req).then(cached => {
+      const fetchPromise = fetch(req)
+        .then(response => {
+          if (response && response.status === 200 && req.url.startsWith(self.location.origin)) {
+            const cloned = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(req, cloned));
+          }
+          return response;
+        })
+        .catch(() => cached);
+      return cached || fetchPromise;
+    })
   );
 });

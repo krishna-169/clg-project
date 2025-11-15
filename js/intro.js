@@ -36,6 +36,34 @@
       video.playsInline = true;
       video.setAttribute('playsinline', '');
 
+      // Check if intro.mp4 exists before attempting to play
+      if (video) {
+        if (!video.src || video.src.includes('intro.mp4') && !document.querySelector('source[src="assets/intro.mp4"]')) {
+          console.error('intro.mp4 not found in DOM or path issue');
+          endIntro();
+          return;
+        }
+        video.addEventListener('error', (e) => {
+          console.error('Video load error (intro.mp4):', e);
+          endIntro(); // Skip intro if video fails to load
+          const error = new Error(`Failed to load intro.mp4: ${e.message}`);
+          console.error(error);
+          try {
+            fetch('assets/intro.mp4')
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(`Failed to load intro.mp4: ${response.statusText}`);
+                }
+              })
+              .catch(error => {
+                console.error(`Failed to load intro.mp4: ${error.message}`);
+              });
+          } catch (error) {
+            console.error(`Failed to load intro.mp4: ${error.message}`);
+          }
+        });
+      }
+
       // When the video ends, fade out the intro
       video.addEventListener('ended', () => {
         endIntro();
