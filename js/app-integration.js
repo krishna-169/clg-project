@@ -157,12 +157,15 @@
         }
 
         if (googleAuthBtn) {
-            const originalGoogleText = googleAuthBtn.textContent;
+            const googleLabel = googleAuthBtn.querySelector('.google-btn-label');
+            const originalGoogleText = googleLabel ? googleLabel.textContent : 'Continue with Google';
             const restoreGoogleBtn = () => {
                 googleAuthBtn.disabled = false;
                 googleAuthBtn.classList.remove('is-loading');
                 googleAuthBtn.setAttribute('aria-busy', 'false');
-                googleAuthBtn.textContent = originalGoogleText;
+                if (googleLabel) {
+                    googleLabel.textContent = originalGoogleText;
+                }
             };
 
             googleAuthBtn.addEventListener('click', async () => {
@@ -175,7 +178,9 @@
                     googleAuthBtn.disabled = true;
                     googleAuthBtn.classList.add('is-loading');
                     googleAuthBtn.setAttribute('aria-busy', 'true');
-                    googleAuthBtn.textContent = 'Redirecting...';
+                    if (googleLabel) {
+                        googleLabel.textContent = 'Redirecting...';
+                    }
                     await sb.signInWithGoogle();
                 } catch (error) {
                     console.error('Google sign-in failed:', error);
@@ -649,13 +654,14 @@
             try {
                 const profile = await sb.getUserProfile();
                 const user = sb.getCurrentUser();
-                const name = (profile && profile.name) || 'Student';
                 const email = user && user.email ? user.email : '';
+                const name = (profile && profile.name) || (email ? email.split('@')[0] : 'Student');
                 homeUserSummary.textContent = email
-                    ? `Logged in as ${name} (${email})`
-                    : `Logged in as ${name}`;
+                    ? `Welcome back, ${name}! (${email})`
+                    : `Welcome back, ${name}!`;
             } catch (error) {
-                console.error('Failed to refresh home user summary:', error);
+                console.error('Failed to refresh home summary:', error);
+                homeUserSummary.textContent = 'Welcome back!';
             }
         }
 

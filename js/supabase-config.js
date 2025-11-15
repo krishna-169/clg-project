@@ -9,6 +9,15 @@ class SupabaseService {
         this.isAdminFlag = false;
     }
 
+    notifyAuthChange() {
+        if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+            const event = new CustomEvent('supabase-auth-change', {
+                detail: { user: this.currentUser }
+            });
+            window.dispatchEvent(event);
+        }
+    }
+
     async initialize() {
         if (this.isInitialized) return true;
         try {
@@ -23,17 +32,20 @@ class SupabaseService {
                 this.currentUser = session.user;
                 this.updateUIForLoggedInUser();
                 await this.checkIsAdmin();
+                this.notifyAuthChange();
             }
             this.client.auth.onAuthStateChange(async (event, session) => {
                 if (event === 'SIGNED_IN') {
                     this.currentUser = session.user;
                     this.updateUIForLoggedInUser();
                     await this.checkIsAdmin();
+                    this.notifyAuthChange();
                 } else if (event === 'SIGNED_OUT') {
                     this.currentUser = null;
                     this.updateUIForLoggedOutUser();
                     this.isAdminFlag = false;
                     this.updateAdminUI(false);
+                    this.notifyAuthChange();
                 }
             });
             this.isInitialized = true;
@@ -134,6 +146,7 @@ class SupabaseService {
         this.isAdminFlag = false;
         this.updateUIForLoggedOutUser();
         this.updateAdminUI(false);
+        this.notifyAuthChange();
     }
 
     async resetPassword(email) {
