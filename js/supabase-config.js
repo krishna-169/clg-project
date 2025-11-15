@@ -111,6 +111,12 @@ class SupabaseService {
         
         const { error } = await this.client.auth.signOut();
         if (error) throw error;
+
+        // Ensure local state and UI reflect the signed-out status immediately
+        this.currentUser = null;
+        this.isAdminFlag = false;
+        this.updateUIForLoggedOutUser();
+        this.updateAdminUI(false);
     }
 
     async resetPassword(email) {
