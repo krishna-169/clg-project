@@ -1576,8 +1576,10 @@
                         <li><button id="btn-theme-toggle"
                                 style="border:none;background:#f3f4f6;border-radius:999px;padding:6px 12px;cursor:pointer;font-size:0.9rem;">🌙</button>
                         </li>
-                        <li><a class="nav-button-login" id="nav-login-link" role="button" aria-label="Open login dialog"
+                        <li data-logged-out><a class="nav-button-login" id="nav-login-link" role="button" aria-label="Open login dialog"
                                 tabindex="0">Login</a></li>
+                        <li data-logged-in style="display:none;"><a class="nav-button-login" id="nav-logout-link" role="button" aria-label="Logout"
+                                tabindex="0">Logout</a></li>
                     </ul>
                 </div>
             </nav>

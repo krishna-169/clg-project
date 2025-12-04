@@ -497,10 +497,16 @@ class SupabaseService {
 
     // UI Update Methods
     updateUIForLoggedInUser() {
-        const loginLink = document.getElementById('nav-login-link');
-        if (loginLink) {
-            loginLink.textContent = 'Logout';
-            loginLink.onclick = async (e) => {
+        // Hide login button, show logout button
+        const loggedOutElements = document.querySelectorAll('[data-logged-out]');
+        loggedOutElements.forEach(el => el.style.display = 'none');
+        
+        const loggedInElements = document.querySelectorAll('[data-logged-in]');
+        loggedInElements.forEach(el => el.style.display = 'block');
+        
+        const logoutLink = document.getElementById('nav-logout-link');
+        if (logoutLink) {
+            logoutLink.onclick = async (e) => {
                 e.preventDefault();
                 await this.signOut();
             };
@@ -512,9 +518,15 @@ class SupabaseService {
     }
 
     updateUIForLoggedOutUser() {
+        // Show login button, hide logout button
+        const loggedOutElements = document.querySelectorAll('[data-logged-out]');
+        loggedOutElements.forEach(el => el.style.display = 'block');
+        
+        const loggedInElements = document.querySelectorAll('[data-logged-in]');
+        loggedInElements.forEach(el => el.style.display = 'none');
+        
         const loginLink = document.getElementById('nav-login-link');
         if (loginLink) {
-            loginLink.textContent = 'Login';
             loginLink.onclick = (e) => {
                 e.preventDefault();
                 const loginPage = document.getElementById('page-login');
@@ -528,6 +540,10 @@ class SupabaseService {
         // Hide user-specific features
         const userFeatures = document.querySelectorAll('[data-requires-auth]');
         userFeatures.forEach(el => el.style.display = 'none');
+        
+        // Hide admin features
+        const adminFeatures = document.querySelectorAll('[data-admin-only]');
+        adminFeatures.forEach(el => el.style.display = 'none');
     }
 
     async checkIsAdmin() {
@@ -548,11 +564,14 @@ class SupabaseService {
     updateAdminUI(isAdmin) {
         const adminFeatures = document.querySelectorAll('[data-admin-only]');
         adminFeatures.forEach(el => {
-            el.style.display = isAdmin ? 'block' : 'none';
+            // Preserve inline-block for buttons, use block for others
+            const displayValue = isAdmin ? (el.tagName === 'BUTTON' || el.classList.contains('btn-action') ? 'inline-block' : 'block') : 'none';
+            el.style.display = displayValue;
         });
         if (typeof document !== 'undefined' && document.body) {
             document.body.classList.toggle('is-admin', isAdmin);
         }
+        console.log('Admin UI updated:', isAdmin ? 'Admin features visible' : 'Admin features hidden');
     }
 
     // Helper method to check if user is authenticated
