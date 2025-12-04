@@ -1,0 +1,97 @@
+/* Intro overlay styles */
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  overflow: hidden;
+}
+
+.intro-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.intro-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+  pointer-events: none;
+}
+
+/* Responsive breakpoints for optimal video display */
+/* Mobile - Portrait */
+@media screen and (max-width: 480px) and (orientation: portrait) {
+  .intro-video {
+    width: 100%;
+    height: auto;
+    max-height: 90vh;
+  }
+}
+
+/* Mobile - Landscape */
+@media screen and (max-width: 900px) and (orientation: landscape) {
+  .intro-video {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+  }
+}
+
+/* Tablets */
+@media screen and (min-width: 481px) and (max-width: 1024px) {
+  .intro-video {
+    max-width: 90%;
+    max-height: 85vh;
+    margin: auto;
+  }
+}
+
+/* Laptops and larger screens */
+@media screen and (min-width: 1025px) {
+  .intro-video {
+    max-width: 1200px;
+    max-height: 80vh;
+    margin: auto;
+  }
+}
+
+/* hide the logo in the overlay (logo lives in navbar now) */
+.intro-logo { display: none; }
+.intro-skip {
+  position: absolute;
+  right: 18px;
+  top: 14px;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+}
+.intro-skip:focus {
+  outline: 3px solid rgba(255,255,255,0.12);
+}
+/* fade out animation */
+.intro-overlay.fade-out {
+  animation: fadeOut 600ms ease forwards;
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; visibility: hidden; }
+}
+/* make sure on small screens logo size is reasonable */
+@media (max-width: 480px) {
+  .intro-logo { max-width: 140px; width: 46vw; top: 8%; }
+  .intro-skip { right: 12px; top: 10px; padding: 6px 10px; }
+}

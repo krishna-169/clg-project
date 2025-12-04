@@ -1,0 +1,110 @@
+/* Enhanced mobile-first responsive styles */
+
+/* === Base Mobile Styles === */
+@media (max-width: 768px) {
+    /* Typography */
+    body {
+        font-size: 16px;
+    }
+
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.75rem; }
+    h3 { font-size: 1.5rem; }
+
+    /* Layout & Spacing */
+    .container {
+        padding: 0 15px;
+    }
+
+    /* Navigation */
+    .navbar-container {
+        padding: 8px 15px;
+    }
+
+    .site-logo {
+        max-height: 40px;
+        width: auto;
+    }
+
+    .site-title {
+        font-size: 1.2rem;
+    }
+
+    /* Forms */
+    input, select, textarea {
+        font-size: 16px; /* Prevents iOS zoom */
+        padding: 12px;
+    }
+
+    .btn {
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+
+    /* Cards & Grids */
+    .event-card,
+    .market-card,
+    .job-card {
+        margin: 10px 0;
+    }
+
+    /* Floating Buttons */
+    .floating-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 1.25rem;
+    }
+}
+
+/* === Touch Device Optimizations === */
+@media (hover: none) {
+    /* Enhance touch targets */
+    button, 
+    .btn,
+    .nav-button-login,
+    .navbar-toggle {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* Remove hover states */
+    .btn:hover,
+    .nav-button-login:hover {
+        transform: none;
+    }
+}
+
+/* === Larger Screens === */
+@media (min-width: 769px) {
+    .event-card-list {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .market-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 25px;
+    }
+
+    .workspace-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+    }
+}
+
+/* === High DPI Screens === */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .site-logo {
+        image-rendering: -webkit-optimize-contrast;
+    }
+}
+
+/* === Reduced Motion === */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
