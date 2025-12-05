@@ -500,10 +500,10 @@ class SupabaseService {
         // Hide login button, show logout button
         const loggedOutElements = document.querySelectorAll('[data-logged-out]');
         loggedOutElements.forEach(el => el.style.display = 'none');
-        
+
         const loggedInElements = document.querySelectorAll('[data-logged-in]');
         loggedInElements.forEach(el => el.style.display = 'block');
-        
+
         const logoutLink = document.getElementById('nav-logout-link');
         if (logoutLink) {
             logoutLink.onclick = async (e) => {
@@ -521,10 +521,10 @@ class SupabaseService {
         // Show login button, hide logout button
         const loggedOutElements = document.querySelectorAll('[data-logged-out]');
         loggedOutElements.forEach(el => el.style.display = 'block');
-        
+
         const loggedInElements = document.querySelectorAll('[data-logged-in]');
         loggedInElements.forEach(el => el.style.display = 'none');
-        
+
         const loginLink = document.getElementById('nav-login-link');
         if (loginLink) {
             loginLink.onclick = (e) => {
@@ -540,7 +540,7 @@ class SupabaseService {
         // Hide user-specific features
         const userFeatures = document.querySelectorAll('[data-requires-auth]');
         userFeatures.forEach(el => el.style.display = 'none');
-        
+
         // Hide admin features
         const adminFeatures = document.querySelectorAll('[data-admin-only]');
         adminFeatures.forEach(el => el.style.display = 'none');

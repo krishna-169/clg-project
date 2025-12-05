@@ -1019,6 +1019,27 @@
         }
 
         // ===================================
+        // Admin Navigation Link
+        // ===================================
+        const adminDashboardLink = document.getElementById('nav-admin-dashboard-link');
+        if (adminDashboardLink) {
+            adminDashboardLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!sb.isAuthenticated()) {
+                    alert('Please login first.');
+                    showPage(document.getElementById('page-login'));
+                    return;
+                }
+                if (!sb.isAdmin()) {
+                    alert('Admin access only.');
+                    return;
+                }
+                const adminDashboard = document.getElementById('page-admin-dashboard');
+                showPage(adminDashboard);
+            });
+        }
+
+        // ===================================
         // Admin Dashboard Integration
         // ===================================
 
