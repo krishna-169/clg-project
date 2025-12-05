@@ -1045,20 +1045,42 @@
 
         const adminDashboardPage = document.getElementById('page-admin-dashboard');
         if (adminDashboardPage) {
+            // Load dashboard when page becomes visible
+            const loadDashboardIfAdmin = async () => {
+                const computedStyle = window.getComputedStyle(adminDashboardPage);
+                const isVisible = computedStyle.display !== 'none';
+                
+                if (isVisible && sb.isAuthenticated() && sb.isAdmin()) {
+                    console.log('Loading admin dashboard...');
+                    await loadAdminDashboard();
+                } else if (isVisible && (!sb.isAuthenticated() || !sb.isAdmin())) {
+                    console.log('Admin access denied, redirecting...');
+                    alert('Admin access only.');
+                    showPage(document.getElementById('page-home'));
+                }
+            };
+
             const observer = new MutationObserver((mutations) => {
                 mutations.forEach(async (mutation) => {
-                    if (mutation.target === adminDashboardPage && adminDashboardPage.style.display === 'block') {
-                        // Only attempt to load if authenticated and admin
-                        if (!sb.isAuthenticated() || !sb.isAdmin()) {
-                            alert('Admin access only.');
-                            showPage(document.getElementById('page-home'));
-                            return;
-                        }
-                        await loadAdminDashboard();
+                    if (mutation.target === adminDashboardPage) {
+                        await loadDashboardIfAdmin();
                     }
                 });
             });
-            observer.observe(adminDashboardPage, { attributes: true, attributeFilter: ['style'] });
+            
+            // Use class and attribute changes for better detection
+            observer.observe(adminDashboardPage, { 
+                attributes: true, 
+                attributeFilter: ['style', 'class'],
+                subtree: false 
+            });
+            
+            // Also trigger on initial load if admin
+            setTimeout(() => {
+                if (adminDashboardPage && sb.isAdmin()) {
+                    loadDashboardIfAdmin();
+                }
+            }, 500);
         }
 
         async function loadAdminDashboard() {
@@ -1457,13 +1479,32 @@
             'page-feedback'
         ]);
 
+        // Admin pages that require admin access
+        const adminPageIds = new Set([
+            'page-admin-dashboard'
+        ]);
+
         if (page && sb && sb.isInitialized && typeof sb.isAuthenticated === 'function') {
             const isLoginPage = loginPage && page === loginPage;
             const isPublicPage = publicPageIds.has(page.id);
+            const isAdminPage = adminPageIds.has(page.id);
             const isAuthed = sb.isAuthenticated();
+            const isAdmin = sb.isAdmin();
 
-            // Only guard non-public, non-login pages
-            if (!isLoginPage && !isPublicPage && !isAuthed) {
+            // Check admin page access
+            if (isAdminPage && (!isAuthed || !isAdmin)) {
+                alert('Admin access only. Please login as admin.');
+                window.pendingPageId = page.id;
+                if (loginPage) {
+                    document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+                    loginPage.style.display = 'block';
+                    window.scrollTo(0, 0);
+                    return;
+                }
+            }
+
+            // Only guard non-public, non-login, non-admin pages
+            if (!isLoginPage && !isPublicPage && !isAdminPage && !isAuthed) {
                 // Remember desired page and redirect to login
                 window.pendingPageId = page.id;
                 if (loginPage) {
